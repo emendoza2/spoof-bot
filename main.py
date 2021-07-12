@@ -11,7 +11,7 @@ import os
 
 load_dotenv()
 
-BOT_TOKEN = os.environ.get("SECRET_KEY")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 HOME_GUILD = int(os.environ.get("HOME_GUILD"))
 
 class SpoofBot(commands.Bot):
