@@ -194,6 +194,8 @@ class SpoofBot(commands.Bot):
             else:
                 await ctx.send("Message sent.", hidden=True)
 
+        print("Added slash commands for guilds: ", self.guild_ids)
+
         
 
 bot = SpoofBot(command_prefix="'")
