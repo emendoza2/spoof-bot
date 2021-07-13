@@ -12,6 +12,7 @@ import os
 load_dotenv()
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
+BOT_OWNER = int(os.environ.get("BOT_OWNER"))
 HOME_GUILD = int(os.environ.get("HOME_GUILD"))
 
 class SpoofBot(commands.Bot):
@@ -21,11 +22,15 @@ class SpoofBot(commands.Bot):
         self.slash = SlashCommand(self, sync_commands=True)
         self.guild_ids = [HOME_GUILD]
         self.add_commands()
-
+        self.permissions = {}
 
     async def on_ready(self):
         print(f"Logged in as {self.user}")
         self.guild_ids = [guild.id for guild in self.guilds]
+        # self.permissions = {guild.id: {
+        #     manage_guild: [role.id for role in guild.roles if role.permissions.manage_guild],
+        #     manage_guild: [role.id for role in guild.roles if role.permissions.manage_guild]
+        # }}
         self.add_slash_commands()
 
     async def create_webhook(self, channel: discord.TextChannel, name: str = "Webhook"):
@@ -45,6 +50,11 @@ class SpoofBot(commands.Bot):
             w = await self.create_webhook(ctx.channel, bot.user.display_name)
             await w.send(message, name=name)
             await ctx.message.delete()
+
+        @self.command()
+        @commands.has_permissions(manage_guild=True)
+        async def enable_roles(ctx, command: str, *roles: discord.Role):
+            permissions[ctx.guild.id] = [role.id for role in roles]
 
         @self.command()
         async def initslashcommands(ctx):
@@ -87,7 +97,8 @@ class SpoofBot(commands.Bot):
             guild_id=self.guild_ids[0],
             permissions=[
                 create_permission(769407256622006343,
-                                  SlashCommandPermissionType.ROLE, True)
+                                  SlashCommandPermissionType.ROLE, True),
+                create_permission(BOT_OWNER, SlashCommandPermissionType.USER, True)
             ])
         async def _echo(ctx, message: str, channel: discord.TextChannel = None):
             if not channel:
@@ -123,7 +134,8 @@ class SpoofBot(commands.Bot):
             guild_id=self.guild_ids[0],
             permissions=[
                 create_permission(769407256622006343,
-                                  SlashCommandPermissionType.ROLE, True)
+                                  SlashCommandPermissionType.ROLE, True),
+                create_permission(BOT_OWNER, SlashCommandPermissionType.USER, True)
             ])
         async def _spoof(ctx, user: discord.User, message: str, channel: discord.TextChannel = None):
             w = await self.create_webhook(channel or ctx.channel, bot.user.name)
@@ -167,7 +179,8 @@ class SpoofBot(commands.Bot):
             guild_id=self.guild_ids[0],
             permissions=[
                 create_permission(769407256622006343,
-                                  SlashCommandPermissionType.ROLE, True)
+                                  SlashCommandPermissionType.ROLE, True),
+                create_permission(BOT_OWNER, SlashCommandPermissionType.USER, True)
             ])
         async def _move(ctx, message_id: str, to_channel: discord.TextChannel, from_channel: discord.TextChannel, delete_original: bool = True):
             from_channel = from_channel or ctx.channel
